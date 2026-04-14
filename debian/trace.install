@@ -1,0 +1,9 @@
+usr/bin/*
+usr/lib/*/
+usr/share/trace/
+usr/share/applications/
+usr/share/icons/
+usr/share/mime/
+usr/share/metainfo/
+usr/share/bash-completion/
+usr/share/zsh/

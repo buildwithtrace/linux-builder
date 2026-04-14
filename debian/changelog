@@ -1,0 +1,5 @@
+trace (1.2.0-1) unstable; urgency=medium
+
+  * Initial Trace Linux package release.
+
+ -- Trace Developers <hello@buildwithtrace.com>  Mon, 23 Mar 2026 12:00:00 +0000

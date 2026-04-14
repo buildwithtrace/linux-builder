@@ -1,0 +1,76 @@
+Source: trace
+Section: electronics
+Priority: optional
+Maintainer: Trace Developers <hello@buildwithtrace.com>
+Build-Depends: debhelper (>= 13), cmake (>= 3.22), ninja-build,
+ g++ (>= 10), lld,
+ python3-dev, swig4.0 | swig4.1 | swig,
+ python3-wxgtk4.0,
+ libwxgtk3.2-dev, libwxgtk-webview3.2-dev,
+ libgtk-3-dev,
+ libboost-all-dev, libglm-dev (>= 0.9.5.1),
+ libglew-dev,
+ libglu1-mesa-dev, libgl1-mesa-dev, mesa-common-dev,
+ libcairo2-dev, libpixman-1-dev,
+ libcurl4-openssl-dev, libssl-dev,
+ libngspice0-dev (>= 37),
+ libocct-modeling-algorithms-dev (>= 7.5.1),
+ libocct-modeling-data-dev (>= 7.5.1),
+ libocct-data-exchange-dev (>= 7.5.1),
+ libocct-visualization-dev (>= 7.5.1),
+ libocct-foundation-dev (>= 7.5.1),
+ libocct-ocaf-dev (>= 7.5.1),
+ libgit2-dev (>= 1.1), libsecret-1-dev,
+ libsqlite3-dev, libzstd-dev, zlib1g-dev, libbz2-dev,
+ libprotobuf-dev, protobuf-compiler, libnng-dev,
+ libfreetype-dev, libharfbuzz-dev, libfontconfig-dev,
+ libspnav-dev, unixodbc-dev,
+ shared-mime-info,
+ libpoppler-dev, libpoppler-glib-dev,
+ gettext, libx11-dev, pkg-config
+Standards-Version: 4.6.0
+Homepage: https://buildwithtrace.com
+Vcs-Git: https://github.com/buildwithtrace/trace.git
+
+Package: trace
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ python3-wxgtk4.0,
+ libngspice0
+Recommends: trace-libraries, trace-demos
+Description: AI-Native PCB Design Suite
+ Trace is a modified version of the KiCad EDA software, enhanced with
+ AI-native circuit design capabilities. It features schematic capture,
+ integrated circuit simulation, printed circuit board (PCB) layout,
+ 3D rendering, and AI-powered design assistance.
+ .
+ Trace extends KiCad with:
+ .
+  * AI Circuit Assistant for natural language design
+  * Intelligent component search and suggestions
+  * Cloud integration for team collaboration
+  * Enhanced workflow for modern hardware engineering
+ .
+ Trace is made up of several components:
+ .
+  * Trace project manager
+  * Schematic editor
+  * PCB editor
+  * 3D viewer
+  * Gerber viewer
+
+Package: trace-dbgsym
+Architecture: amd64 arm64
+Depends: trace (= ${binary:Version}), ${misc:Depends}
+Description: Debug symbols for Trace
+ Debug symbols for the Trace AI-native PCB design suite.
+ Install this package if you need to debug Trace crashes.
+
+Package: trace-demos
+Architecture: all
+Depends: ${misc:Depends}
+Recommends: trace
+Description: Trace demo projects
+ Example projects for learning Trace PCB design.
+ Includes various typical small use cases from simple through-hole
+ designs to complex SMD projects with multiple layers.

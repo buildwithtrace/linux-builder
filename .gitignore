@@ -1,0 +1,20 @@
+# Build artifacts
+build/
+output/
+
+# Docker build context artifacts
+*.AppImage
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# env files
+.env

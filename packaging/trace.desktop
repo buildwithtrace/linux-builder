@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Icon=trace
+Type=Application
+Categories=Science;Electronics;Engineering;
+Exec=trace %u
+StartupWMClass=trace
+Keywords=Projectmanager;EDA;PCB;Schematic;
+MimeType=application/x-kicad-project;x-scheme-handler/trace;
+Name=Trace
+GenericName=EDA Suite
+Comment=AI-native PCB design suite based on KiCad
+X-Desktop-File-Install-Version=0.22

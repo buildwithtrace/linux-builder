@@ -1,0 +1,82 @@
+#!/bin/bash
+# AppRun entrypoint for Trace AppImage (sharun-based)
+#
+# Most env vars are set via .env (processed by sharun automatically).
+# This script handles runtime-only setup that .env cannot do:
+#   1. trace:// URL scheme registration (OAuth auth callback)
+#   2. WebKit helper symlink (needs filesystem operation)
+#   3. nvidia EGL vendor detection (needs host filesystem inspection)
+
+SHARUN_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+
+# Desktop integration: register the app in the system menu and the trace://
+# URL scheme handler so OAuth sign-in callbacks work.
+# $APPIMAGE is set by the AppImage runtime to the real path of the .AppImage file.
+if [ -n "${APPIMAGE:-}" ]; then
+    local_apps="${HOME}/.local/share/applications"
+    local_icons="${HOME}/.local/share/icons/hicolor/scalable/apps"
+    desktop_file="${local_apps}/trace-appimage.desktop"
+
+    if [ ! -f "${desktop_file}" ] || ! grep -qF "${APPIMAGE}" "${desktop_file}" 2>/dev/null; then
+        mkdir -p "${local_apps}" "${local_icons}"
+
+        # Install the app icon so the menu entry and taskbar show the Trace logo
+        if [ -f "${SHARUN_DIR}/trace.svg" ]; then
+            cp -f "${SHARUN_DIR}/trace.svg" "${local_icons}/trace.svg"
+        fi
+
+        cat > "${desktop_file}" <<EOF
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Icon=trace
+Type=Application
+Categories=Science;Electronics;Engineering;
+Exec="${APPIMAGE}" %u
+StartupWMClass=trace
+MimeType=application/x-kicad-project;x-scheme-handler/trace;
+Name=Trace
+GenericName=EDA Suite
+Comment=AI-native PCB design suite based on KiCad
+EOF
+        update-desktop-database "${local_apps}" 2>/dev/null || true
+        xdg-mime default trace-appimage.desktop x-scheme-handler/trace 2>/dev/null || true
+    fi
+fi
+
+# Python environment -- set here BEFORE sharun to prevent interference.
+# The stdlib lives at shared/python/lib/python3.X/ (not shared/lib/) so that
+# sharun's auto-detection (which globs shared/$LIB/python*) cannot find it
+# and override PYTHONHOME with an incorrect value.
+py_dir=$(ls -d "${SHARUN_DIR}/shared/python/lib/python3."* 2>/dev/null | head -1)
+if [ -n "${py_dir}" ]; then
+    export PYTHONHOME="${SHARUN_DIR}/shared/python"
+    export PYTHONPATH="${py_dir}:${py_dir}/lib-dynload:${py_dir}/dist-packages:${py_dir}/site-packages:${SHARUN_DIR}/shared/python/lib/python3/dist-packages"
+    export PYTHONDONTWRITEBYTECODE=1
+    export PYTHONNOUSERSITE=1
+fi
+
+# WebKit's compiled-in PKGLIBEXECDIR was binary-patched at build time to
+# /tmp/.trace-wk-helpers. Create a symlink so WebKit finds the bundled helpers.
+if [ -d "${SHARUN_DIR}/shared/lib/webkit2gtk-4.1" ]; then
+    ln -sfn "${SHARUN_DIR}/shared/lib/webkit2gtk-4.1" /tmp/.trace-wk-helpers
+fi
+
+# nvidia PRIME EGL support. When the nvidia kernel module is loaded, prepend
+# the host's nvidia EGL vendor JSON so GLVND uses nvidia for EGL rendering.
+# The bundled Mesa JSON is appended as fallback.
+if [ -f /sys/module/nvidia/version ] && [ -z "${__EGL_VENDOR_LIBRARY_FILENAMES:-}" ]; then
+    nv_json=""
+    for d in /usr/share/glvnd/egl_vendor.d /usr/local/share/glvnd/egl_vendor.d; do
+        if [ -f "$d/10_nvidia.json" ]; then
+            nv_json="$d/10_nvidia.json"
+            break
+        fi
+    done
+    mesa_json="${SHARUN_DIR}/share/glvnd/egl_vendor.d/50_mesa.json"
+    if [ -n "$nv_json" ] && [ -f "$mesa_json" ]; then
+        export __EGL_VENDOR_LIBRARY_FILENAMES="${nv_json}:${mesa_json}"
+    fi
+fi
+
+exec "${SHARUN_DIR}/bin/trace" "$@"
