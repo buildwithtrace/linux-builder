@@ -209,7 +209,7 @@ sudo apt-get install -y devscripts debhelper lintian
 cd /path/to/Trace
 debuild -us -uc -b
 
-# Result: ../trace_1.2.0-1_amd64.deb
+# Result: ../trace_1.3.0-1_amd64.deb
 ```
 
 ## Troubleshooting
